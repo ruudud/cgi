@@ -18,11 +18,10 @@ As [Nginx](http://nginx.org/) only supports FastCGI out of the box,
 we also need to install [fcgiwrap](https://github.com/gnosek/fcgiwrap).
 
 On Ubuntu: `apt-get install nginx fcgiwrap`
+
 On Arch: `pacman -S nginx fcgiwrap`
 
-
 Example nginx config (`/etc/nginx/sites-enabled/default`):
-
 ```
 server {
     listen   80;

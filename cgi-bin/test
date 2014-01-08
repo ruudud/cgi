@@ -1,10 +1,15 @@
 #!/bin/bash
+#
+# Example Bash CGI script.
+#
+# Caveat: Remember the empty line after echoing headers
+#
 
-# httpbash creates the associative array 
+# httputils creates the associative arrays POST_PARAMS and GET_PARAMS
 if [[ "$SCRIPT_FILENAME" ]]; then
-  . "$(dirname $SCRIPT_FILENAME)/httpbash"
+  . "$(dirname $SCRIPT_FILENAME)/httputils"
 else
-  . "$(dirname $(pwd)$SCRIPT_NAME)/httpbash"
+  . "$(dirname $(pwd)$SCRIPT_NAME)/httputils"
 fi
 
 POST_vars_to_str() {
@@ -15,14 +20,7 @@ POST_vars_to_str() {
   done
   eval $__resultvar="'$q'"
 }
-GET_vars_to_str() {
-  local __resultvar=$1
-  local q
-  for param in "${!GET_PARAMS[@]}"; do
-    q="${q} \"${param}\": \"${GET_PARAMS[$param]}\"," 
-  done
-  eval $__resultvar="'$q'"
-}
+
 do_POST() {
   POST_vars_to_str result
   echo "Status: 200 OK"
@@ -34,21 +32,20 @@ do_POST() {
 JSON
 }
 do_GET() {
-  GET_vars_to_str result
   echo "Status: 405 Method Not Allowed"
   echo ""
   cat <<JSON
 {
-    $result
+    "query_string": "$QUERY_STRING"
 }
 JSON
 }
 
-# Common headers goes here
-echo "Content-Type: application/json"
-
 # Print out available ENV vars
 #/usr/bin/env
+
+# Common headers goes here
+echo "Content-Type: application/json"
 
 case $REQUEST_METHOD in
   POST)
