@@ -1,0 +1,52 @@
+#!/bin/bash
+# HTTP POST and GET params in an associative array
+declare -A GET_PARAMS
+declare -A POST_PARAMS
+
+read_POST_vars() {
+  if [[ "$REQUEST_METHOD" = "POST" ]] && [[ ! -z "$CONTENT_LENGTH" ]]; then
+    read -n $CONTENT_LENGTH QUERY_STRING_POST
+  fi
+}
+
+parse_POST_params() {
+  local q p k v
+
+  if [[ ! "${QUERY_STRING_POST}" ]]; then
+    return
+  fi
+
+  q="${QUERY_STRING_POST}&"
+
+  while [[ ! -z "$q" ]]; do
+    p="${q%%&*}"  # get first part of query string
+    k="${p%%=*}"  # get the key (variable name) from it
+    v="${p#*=}"   # get the value from it
+    q="${q#$p&*}" # strip first part from query string
+
+    POST_PARAMS["${k}"]="${v}"
+  done
+}
+
+parse_GET_params() {
+  local q p k v
+
+  if [[ ! "${QUERY_STRING}" ]]; then
+    return
+  fi
+
+  q="${QUERY_STRING}&"
+
+  while [[ ! -z "$q" ]]; do
+    p="${q%%&*}"  # get first part of query string
+    k="${p%%=*}"  # get the key (variable name) from it
+    v="${p#*=}"   # get the value from it
+    q="${q#$p&*}" # strip first part from query string
+
+    GET_PARAMS["${k}"]="${v}"
+  done
+}
+
+read_POST_vars
+parse_POST_params
+parse_GET_params

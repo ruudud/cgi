@@ -1,0 +1,64 @@
+#!/bin/bash
+
+# httpbash creates the associative array 
+if [[ "$SCRIPT_FILENAME" ]]; then
+  . "$(dirname $SCRIPT_FILENAME)/httpbash"
+else
+  . "$(dirname $(pwd)$SCRIPT_NAME)/httpbash"
+fi
+
+POST_vars_to_str() {
+  local __resultvar=$1
+  local q
+  for param in "${!POST_PARAMS[@]}"; do
+    q="${q} \"${param}\": \"${POST_PARAMS[$param]}\"," 
+  done
+  eval $__resultvar="'$q'"
+}
+GET_vars_to_str() {
+  local __resultvar=$1
+  local q
+  for param in "${!GET_PARAMS[@]}"; do
+    q="${q} \"${param}\": \"${GET_PARAMS[$param]}\"," 
+  done
+  eval $__resultvar="'$q'"
+}
+do_POST() {
+  POST_vars_to_str result
+  echo "Status: 200 OK"
+  echo ""
+  cat <<JSON
+{
+    $result
+}
+JSON
+}
+do_GET() {
+  GET_vars_to_str result
+  echo "Status: 405 Method Not Allowed"
+  echo ""
+  cat <<JSON
+{
+    $result
+}
+JSON
+}
+
+# Common headers goes here
+echo "Content-Type: application/json"
+
+# Print out available ENV vars
+#/usr/bin/env
+
+case $REQUEST_METHOD in
+  POST)
+    do_POST
+    ;;
+  GET)
+    do_GET
+    ;;
+  *)
+    echo "No handle for $REQUEST_METHOD"
+    exit 0
+    ;;
+esac
