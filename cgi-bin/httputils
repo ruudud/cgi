@@ -5,7 +5,7 @@ declare -A POST_PARAMS
 
 read_POST_vars() {
   if [[ "$REQUEST_METHOD" = "POST" ]] && [[ ! -z "$CONTENT_LENGTH" ]]; then
-    read -n $CONTENT_LENGTH QUERY_STRING_POST
+    QUERY_STRING_POST=$(dd bs="${CONTENT_LENGTH}" count=1 status=none)
   fi
 }
 
