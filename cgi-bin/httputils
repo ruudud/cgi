@@ -10,41 +10,28 @@ read_POST_vars() {
 }
 
 parse_POST_params() {
-  local q p k v
 
-  if [[ ! "${QUERY_STRING_POST}" ]]; then
-    return
-  fi
-
-  q="${QUERY_STRING_POST}&"
-
-  while [[ ! -z "$q" ]]; do
-    p="${q%%&*}"  # get first part of query string
-    k="${p%%=*}"  # get the key (variable name) from it
-    v="${p#*=}"   # get the value from it
-    q="${q#$p&*}" # strip first part from query string
-
-    POST_PARAMS["${k}"]="${v}"
-  done
+saveIFS=$IFS
+IFS='=&'
+parm=($QUERY_STRING_POST)
+IFS=$saveIFS
+for ((i=0; i<${#parm[@]}; i+=2))
+do
+    POST_PARAMS[${parm[i]}]=${parm[i+1]}
+done
+return
 }
 
 parse_GET_params() {
-  local q p k v
-
-  if [[ ! "${QUERY_STRING}" ]]; then
-    return
-  fi
-
-  q="${QUERY_STRING}&"
-
-  while [[ ! -z "$q" ]]; do
-    p="${q%%&*}"  # get first part of query string
-    k="${p%%=*}"  # get the key (variable name) from it
-    v="${p#*=}"   # get the value from it
-    q="${q#$p&*}" # strip first part from query string
-
-    GET_PARAMS["${k}"]="${v}"
-  done
+saveIFS=$IFS
+IFS='=&'
+parm=($QUERY_STRING)
+IFS=$saveIFS
+for ((i=0; i<${#parm[@]}; i+=2))
+do
+    GET_PARAMS[${parm[i]}]=${parm[i+1]}
+done
+return
 }
 
 read_POST_vars
